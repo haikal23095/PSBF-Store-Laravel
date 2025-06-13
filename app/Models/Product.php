@@ -10,7 +10,7 @@ class Product extends Model
     use HasFactory;
 
     // Menentukan primary key
-    protected $primaryKey = 'product_id';
+    protected $primaryKey = 'id';
 
     /**
      * Atribut yang dapat diisi secara massal.

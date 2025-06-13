@@ -24,7 +24,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // PERUBAHAN: Memanggil class middleware secara langsung, bukan via alias 'role'.
 Route::middleware(['auth', \App\Http\Middleware\RoleMiddleware::class . ':penjual'])->group(function () {
     Route::get('/penjual/dashboard', [DashboardController::class, 'penjualDashboard'])->name('penjual.dashboard');
-
+    
     // Rute CRUD Produk
     // Ini akan secara otomatis membuat rute untuk index, create, store, show, edit, update, destroy
     Route::resource('/penjual/produk', ProductController::class)->names('penjual.produk');

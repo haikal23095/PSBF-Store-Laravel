@@ -44,8 +44,9 @@
                         </td>
                         <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                             <div class="flex items-center space-x-2">
-                                <a href="{{ route('penjual.produk.edit', $product->product_id) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
-                                <form action="{{ route('penjual.produk.destroy', $product->product_id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk ini?');">
+                                {{-- PERBAIKAN: Memberikan parameter secara eksplisit --}}
+                                <a href="{{ route('penjual.produk.edit', ['produk' => $product->id]) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                <form action="{{ route('penjual.produk.destroy', ['produk' => $product->id]) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk ini?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>

@@ -1,9 +1,18 @@
 @extends('layouts.app')
 {{-- @include('layouts.app', ['title' => 'Dashboard Penjual']) --}}
 @section('content')
+
+
 <div class="container mx-auto py-8">
     <h1 class="text-3xl font-bold text-gray-800">Dashboard Penjual</h1>
     <p class="mt-2 text-gray-600">Selamat datang kembali, {{ $user->name }}!</p>
+
+    <div class="mt-8">
+        <a href="{{ route('penjual.produk.index') }}" class="block w-full md:w-auto md:inline-block bg-indigo-600 text-white text-center font-bold py-4 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-300 shadow-lg">
+            Kelola Produk Anda &rarr;
+        </a>
+    </div>
+
 
     <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- Card Statistik -->
