@@ -2,7 +2,12 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
-    <h1 class="text-2xl font-bold mb-6">Daftar Transaksi Pembeli</h1>
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold">Daftar Transaksi Pembeli</h1>
+        <a href="{{ route('penjual.dashboard') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded inline-block transition">
+            &larr; Kembali
+        </a>
+    </div>
 
     <div class="bg-white shadow-md rounded">
         <table class="min-w-full">

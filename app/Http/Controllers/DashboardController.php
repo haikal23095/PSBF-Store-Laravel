@@ -14,7 +14,7 @@ class DashboardController extends Controller
         $er = 5;
         return view('penjual.dashboard', compact('user', 'er'));
     }
-
+    
     public function transaksiPenjual()
     {
         $penjualId = Auth::id();
