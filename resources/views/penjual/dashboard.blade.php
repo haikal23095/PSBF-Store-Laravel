@@ -11,8 +11,12 @@
         <a href="{{ route('penjual.produk.index') }}" class="block w-full md:w-auto md:inline-block bg-indigo-600 text-white text-center font-bold py-4 px-6 rounded-lg hover:bg-indigo-700 transition-colors duration-300 shadow-lg">
             Kelola Produk Anda &rarr;
         </a>
-    </div>
 
+        {{-- Tombol tambahan untuk melihat transaksi --}}
+        <a href="{{ route('penjual.transaksi.index') }}" class="block w-full md:w-auto md:inline-block bg-green-600 text-white text-center font-bold py-4 px-6 rounded-lg hover:bg-green-700 transition-colors duration-300 shadow-lg">
+            Lihat Riwayat Transaksi &rarr;
+        </a>
+    </div>
 
     <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- Card Statistik -->

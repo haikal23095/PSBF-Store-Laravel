@@ -4,6 +4,7 @@
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Manajemen Produk</h1>
+        
         <a href="{{ route('penjual.produk.create') }}" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
             + Tambah Produk
         </a>
@@ -30,7 +31,10 @@
                 @forelse ($products as $product)
                     <tr>
                         <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+
                             <img src="{{ $product->gambar ? asset('storage/' . $product->gambar) : 'https://placehold.co/100x100/e2e8f0/e2e8f0?text=No+Image' }}" alt="{{ $product->nama_barang }}" class="w-20 h-20 object-cover rounded">
+                            {{-- {{ dd($product->gambar) }} --}}
+
                         </td>
                         <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                             <p class="text-gray-900 whitespace-no-wrap">{{ $product->nama_barang }}</p>
