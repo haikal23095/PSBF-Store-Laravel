@@ -117,4 +117,6 @@ class ProductController extends Controller
         return redirect()->route('penjual.produk.index')
                          ->with('success', 'Produk berhasil dihapus.');
     }
+
+    
 }

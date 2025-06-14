@@ -22,19 +22,20 @@
         <!-- Card Statistik -->
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h3 class="text-lg font-semibold text-gray-700">Total Produk</h3>
-            <p class="text-3xl font-bold mt-2 text-indigo-600">150</p>
+            <p class="text-3xl font-bold mt-2 text-indigo-600">{{ $totalProduk }}</p>
         </div>
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h3 class="text-lg font-semibold text-gray-700">Pesanan Baru</h3>
-            <p class="text-3xl font-bold mt-2 text-green-600">12</p>
+            <p class="text-3xl font-bold mt-2 text-green-600">{{ $pesananBaru }}</p>
         </div>
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h3 class="text-lg font-semibold text-gray-700">Total Pendapatan</h3>
-            <p class="text-3xl font-bold mt-2 text-blue-600">Rp 5.2Jt</p>
+            <p class="text-3xl font-bold mt-2 text-blue-600">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</p>
+            
         </div>
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h3 class="text-lg font-semibold text-gray-700">Produk Habis</h3>
-            <p class="text-3xl font-bold mt-2 text-red-600">5</p>
+            <p class="text-3xl font-bold mt-2 text-red-600">{{ $produkHabis }}</p>
         </div>
     </div>
 </div>
