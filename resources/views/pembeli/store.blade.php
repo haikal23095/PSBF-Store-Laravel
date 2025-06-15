@@ -2,7 +2,23 @@
 
 @section('content')
 <div class="container mx-auto px-4 py-8">
-    <h1 class="text-2xl font-bold text-gray-800 mb-6">Daftar Produk</h1>
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Daftar Produk</h1>
+        {{-- Tombol Keranjang --}}
+        <a href="{{ route('pembeli.cart') }}" class="relative inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+            <i class="fas fa-shopping-cart mr-2"></i>
+            Keranjang
+            {{-- Tampilkan jumlah item di keranjang jika ada --}}
+            @php
+                $cartCount = count(Session::get('cart', []));
+            @endphp
+            @if ($cartCount > 0)
+                <span class="absolute top-0 right-0 -mt-2 -mr-2 px-2 py-1 text-xs font-bold bg-red-500 rounded-full">
+                    {{ $cartCount }}
+                </span>
+            @endif
+        </a>
+    </div>
 
     <div class="md:w-1/4 mb-4">
         <form method="GET" action="{{ route('pembeli.store') }}">
@@ -19,6 +35,12 @@
     </div>
 
     <div class="md:w-3/4">
+        @if (session('success'))
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <span class="block sm:inline">{{ session('success') }}</span>
+            </div>
+        @endif
+
         @if ($products->isEmpty())
             <p class="text-center text-gray-500">Belum ada produk tersedia.</p>
         @else
@@ -37,9 +59,14 @@
                                 </p>
                             </div>
 
-                            <a href="#" class="block text-center mt-3 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
-                                Masukkan Keranjang
-                            </a>
+                            {{-- Form untuk menambahkan ke keranjang --}}
+                            <form action="{{ route('pembeli.cart.add', $product) }}" method="POST" class="mt-3">
+                                @csrf
+                                <input type="hidden" name="quantity" value="1"> {{-- Default quantity to 1 --}}
+                                <button type="submit" class="block w-full text-center px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+                                    Masukkan Keranjang
+                                </button>
+                            </form>
                         </div>
                     </div>
                 @endforeach
