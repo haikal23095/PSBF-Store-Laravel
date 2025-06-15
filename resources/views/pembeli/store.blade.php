@@ -4,35 +4,32 @@
 <div class="container mx-auto px-4 py-8">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Daftar Produk</h1>
-        {{-- Tombol Keranjang --}}
-        <a href="{{ route('pembeli.cart') }}" class="relative inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
-            <i class="fas fa-shopping-cart mr-2"></i>
-            Keranjang
-            {{-- Tampilkan jumlah item di keranjang jika ada --}}
-            @php
-                $cartCount = count(Session::get('cart', []));
-            @endphp
-            @if ($cartCount > 0)
-                <span class="absolute top-0 right-0 -mt-2 -mr-2 px-2 py-1 text-xs font-bold bg-red-500 rounded-full">
-                    {{ $cartCount }}
-                </span>
-            @endif
-        </a>
+
+        {{-- Bungkus kedua tombol dalam satu flex container --}}
+        <div class="flex items-center gap-3">
+            {{-- Tombol Transaksi --}}
+            <a href="{{ route('pembeli.transaksi.index') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+                <i class="fas fa-receipt mr-2"></i>
+                Transaksi Saya
+            </a>
+
+            {{-- Tombol Keranjang --}}
+            <a href="{{ route('pembeli.cart') }}" class="relative inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                <i class="fas fa-shopping-cart mr-2"></i>
+                Keranjang
+                @php
+                    $cartCount = count(Session::get('cart', []));
+                @endphp
+                @if ($cartCount > 0)
+                    <span class="absolute top-0 right-0 -mt-2 -mr-2 px-2 py-1 text-xs font-bold bg-red-500 rounded-full">
+                        {{ $cartCount }}
+                    </span>
+                @endif
+            </a>
+        </div>
     </div>
 
-    <div class="md:w-1/4 mb-4">
-        <form method="GET" action="{{ route('pembeli.store') }}">
-            <label for="kategori" class="block text-sm font-medium text-gray-700 mb-2">Kategori:</label>
-            <select name="kategori" id="kategori" onchange="this.form.submit()" class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <option value="">Semua Kategori</option>
-                @foreach ($kategoriList as $kategori)
-                    <option value="{{ $kategori }}" {{ request('kategori') == $kategori ? 'selected' : '' }}>
-                        {{ ucfirst($kategori) }}
-                    </option>
-                @endforeach
-            </select>
-        </form>
-    </div>
+
 
     <div class="md:w-3/4">
         @if (session('success'))
