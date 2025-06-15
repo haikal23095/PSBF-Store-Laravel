@@ -13,6 +13,13 @@ class Transaction extends Model
 
     protected $fillable = ['user_id', 'total_harga', 'tanggal_transaksi', 'status_transaksi', 'payment_id'];
 
+    // App\Models\User.php
+    public function transaksis()
+    {
+        return $this->hasMany(Transaction::class, 'user_id');
+    }
+    
+
     public function details()
     {
         return $this->hasMany(TransactionDetail::class, 'transaksi_id');
