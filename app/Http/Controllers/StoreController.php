@@ -125,7 +125,7 @@ class StoreController extends Controller
                 'user_id' => $user->id,
                 'total_harga' => $totalPrice,
                 'tanggal_transaksi' => now(),
-                'status_transaksi' => 'menunggu pembayaran', // Status awal transaksi
+                'status_transaksi' => 'menunggu_pembayaran', // Status awal transaksi
                 'payment_id' => null, // Temporarily null, will be updated after payment creation
             ]);
 
@@ -229,7 +229,7 @@ class StoreController extends Controller
                 // For credit card transaction, check 'fraud' status
                 if ($paymentType == 'credit_card') {
                     if ($fraudStatus == 'challenge') {
-                        $transaksi->status_transaksi = 'menunggu pembayaran'; // Still waiting if challenged
+                        $transaksi->status_transaksi = 'menunggu_pembayaran'; // Still waiting if challenged
                         if ($transaksi->payment) {
                             $transaksi->payment->status_payment = 'pending';
                         }
@@ -246,7 +246,7 @@ class StoreController extends Controller
                     $transaksi->payment->status_payment = 'paid';
                 }
             } elseif ($transactionStatus == 'pending') {
-                $transaksi->status_transaksi = 'menunggu pembayaran';
+                $transaksi->status_transaksi = 'menunggu_pembayaran';
                 if ($transaksi->payment) {
                     $transaksi->payment->status_payment = 'pending';
                 }

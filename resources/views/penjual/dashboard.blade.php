@@ -31,7 +31,6 @@
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h3 class="text-lg font-semibold text-gray-700">Total Pendapatan</h3>
             <p class="text-3xl font-bold mt-2 text-blue-600">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</p>
-            
         </div>
         <div class="bg-white p-6 rounded-lg shadow-md">
             <h3 class="text-lg font-semibold text-gray-700">Produk Habis</h3>
