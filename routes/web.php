@@ -13,6 +13,8 @@ Route::get('/', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+
+
 // --- Rute untuk Penjual ---
 if (request()->getPort() == 8001) {
     Route::middleware(['auth', \App\Http\Middleware\RoleMiddleware::class . ':penjual'])->group(function () {
@@ -23,6 +25,7 @@ if (request()->getPort() == 8001) {
         Route::get('/penjual/transaksi', [TransaksiController::class, 'indexPenjual'])->name('penjual.transaksi.index');
         Route::get('/penjual/transaksi/{transaksi}', [TransaksiController::class, 'showPenjual'])->name('penjual.transaksi.show');
         Route::patch('/penjual/transaksi/{transaksi}/update-status', [TransaksiController::class, 'updateStatusPenjual'])->name('penjual.transaksi.updateStatus');
+        Route::patch('/transaksi/{transaksi}/update-status', [TransaksiController::class, 'updateStatus'])->name('transaksi.updateStatus');
     });
 }
 
