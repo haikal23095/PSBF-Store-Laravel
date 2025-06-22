@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\DB;
 use App\Models\DetailTransaksi; // Make sure to import your DetailTransaksi model
 use App\Models\Produk; // Make sure to import your Produk model
 use App\Models\User;
+use App\Models\Payment;
+use Midtrans\Config;
+use Midtrans\Transaction as MidtransTransaction;
 
 class TransaksiController extends Controller
 {
@@ -123,6 +126,64 @@ class TransaksiController extends Controller
             return back()->with('success', 'Status transaksi berhasil diperbarui menjadi ' . $newStatus . '.');
         } else {
             return back()->with('error', 'Transisi status tidak valid.');
+        }
+    }
+
+       public function showPembeli(Transaction $transaksi)
+    {
+        // Pastikan pengguna yang sedang login adalah pemilik transaksi ini
+        if (Auth::id() !== $transaksi->user_id) {
+            abort(403, 'ANDA TIDAK MEMILIKI AKSES KE TRANSAKSI INI.');
+        }
+
+        // 2. Hapus 'payment' dari fungsi load()
+        $transaksi->load('details.product', 'pembeli');
+
+        // 3. Ambil data payment secara manual
+        // Kode ini berdasarkan asumsi dari StoreController.php bahwa
+        // tabel 'payments' memiliki kolom 'transaksi_id'
+        $payment = Payment::where('transaksi_id', $transaksi->id)->first();
+
+        // 4. Tambahkan data payment ke objek transaksi secara manual
+        // agar bisa diakses di view dengan $transaksi->payment
+        $transaksi->payment = $payment;
+
+
+        // Kembalikan view dengan data transaksi yang sudah lengkap
+        return view('pembeli.transaksi.show', compact('transaksi'));
+    }
+    public function checkStatus(Transaction $transaksi)
+    {
+        // Pastikan hanya pemilik yang bisa cek
+        if (auth()->id() !== $transaksi->user_id) {
+            abort(403);
+        }
+
+        // Konfigurasi Midtrans
+        Config::$serverKey = config('services.midtrans.server_key');
+        Config::$isProduction = config('services.midtrans.is_production');
+
+        try {
+            // Panggil API untuk mendapatkan status transaksi dari Midtrans
+            $status = MidtransTransaction::status($transaksi->id); // $transaksi->id adalah order_id Anda
+
+            // Logika pembaruan status berdasarkan respons
+            // Ini bisa direfaktor dari logika yang ada di handleMidtransNotification
+            if ($status->transaction_status == 'settlement' || $status->transaction_status == 'capture') {
+                $transaksi->status_transaksi = 'dikemas';
+                if ($transaksi->payment) {
+                    $transaksi->payment->status_payment = 'paid';
+                    $transaksi->payment->save();
+                }
+                $transaksi->save();
+
+                return redirect()->route('pembeli.transaksi.show', $transaksi)->with('success', 'Status pembayaran berhasil diperbarui!');
+            }
+
+            return redirect()->route('pembeli.transaksi.show', $transaksi)->with('info', 'Status pembayaran belum berubah: ' . $status->transaction_status);
+
+        } catch (\Exception $e) {
+            return redirect()->route('pembeli.transaksi.show', $transaksi)->with('error', 'Gagal mengecek status: ' . $e->getMessage());
         }
     }
 

@@ -23,10 +23,9 @@
     URL skrip sekarang di-hardcode ke URL produksi Midtrans.
     ================================================================
 --}}
-<script type="text/javascript" 
-    src="{{ config('services.midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}"
+<script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js">
     data-client-key="{{ config('services.midtrans.client_key') }}"
-></script>
+</script>
 
 <script type="text/javascript">
     // Gunakan window.onload untuk memastikan SEMUA konten, termasuk skrip eksternal, dimuat sepenuhnya.
