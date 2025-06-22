@@ -176,7 +176,11 @@ class StoreController extends Controller
                     'quantity' => $item['quantity'],
                 ];
             }
-
+            // dd([
+            //     'totalPrice' => $totalPrice,
+            //     'transaksi_id' => $transaksi->id,
+            //     'params' => $params // Inspect the entire payload
+            // ]);
             // Dapatkan Snap Token dari Midtrans
             $snapToken = Snap::getSnapToken($params);
 
@@ -210,7 +214,7 @@ class StoreController extends Controller
     {
         // Set your Merchant Server Key
         Config::$serverKey = config('services.midtrans.server_key');
-        Config::$isProduction = config('services.midtrans.is_production');
+        Config::$isProduction = config('services.midtrans.is_production'); // Set to true if in production
         Config::$isSanitized = true;
         Config::$is3ds = true;
 
