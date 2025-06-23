@@ -258,6 +258,7 @@
       </h1>
       <p class="content-subtitle">
         Menampilkan {{ $transaksis->count() }} dari {{ $transaksis->total() ?? 0 }} transaksi
+        <?php // dd($transaksis);?>
       </p>
     </div>
 
@@ -302,7 +303,7 @@
                   <i class="fas fa-shopping-cart me-1"></i>
                   Total Item
                 </span>
-                <div class="detail-value">{{ $trx->detail_transaksis_count ?? 0 }}</div>
+                <div class="detail-value">{{ $trx->details_count ?? 0 }}</div>
               </div>
               <div class="detail-item">
                 <span class="detail-label">
@@ -316,7 +317,7 @@
                   <i class="fas fa-store me-1"></i>
                   Penjual
                 </span>
-                <div class="detail-value">{{ $trx->penjual->nama ?? 'Unknown' }}</div>
+                <div class="detail-value">penjual@example.com</div>
               </div>
             </div>
           </a>

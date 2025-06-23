@@ -6,7 +6,7 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use App\Models\DetailTransaksi; // Make sure to import your DetailTransaksi model
+use App\Models\TransactionDetail; // Make sure to import your TransactionDetail model
 use App\Models\Produk; // Make sure to import your Produk model
 use App\Models\User;
 use App\Models\Payment;
@@ -31,6 +31,8 @@ class TransaksiController extends Controller
         $transaksis = Auth::user()
             ->transaksis()
             ->where('status_transaksi', $status)
+            ->withCount('details')
+            ->with('details.product.user')
             ->latest() // Menggunakan latest() lebih ringkas dari orderBy('created_at', 'desc')
             ->paginate(10);
             
@@ -166,7 +168,7 @@ class TransaksiController extends Controller
         try {
             // Panggil API untuk mendapatkan status transaksi dari Midtrans
             $status = MidtransTransaction::status($transaksi->id); // $transaksi->id adalah order_id Anda
-
+            
             // Logika pembaruan status berdasarkan respons
             // Ini bisa direfaktor dari logika yang ada di handleMidtransNotification
             if ($status->transaction_status == 'settlement' || $status->transaction_status == 'capture') {
