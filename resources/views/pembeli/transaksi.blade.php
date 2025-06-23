@@ -310,7 +310,7 @@
                   <i class="fas fa-money-bill-wave me-1"></i>
                   Total Bayar
                 </span>
-                <div class="detail-value price">Rp {{ number_format($trx->total_bayar ?? 0, 0, ',', '.') }}</div>
+                <div class="detail-value price">Rp {{ number_format($trx->total_harga ?? 0, 0, ',', '.') }}</div>
               </div>
               <div class="detail-item">
                 <span class="detail-label">
