@@ -26,7 +26,7 @@ if (request()->getPort() == 8001) {
 
         Route::get('/penjual/transaksi', [TransaksiController::class, 'indexPenjual'])->name('penjual.transaksi.index');
         Route::get('/penjual/transaksi/{transaksi}', [TransaksiController::class, 'showPenjual'])->name('penjual.transaksi.show');
-        Route::patch('/penjual/transaksi/{transaksi}/update-status', [TransaksiController::class, 'updateStatusPenjual'])->name('penjual.transaksi.updateStatus');
+        Route::patch('/penjual/transaksi/{transaksi}/update-status', [TransaksiController::class, 'updateStatus'])->name('penjual.transaksi.updateStatus');
         Route::patch('/transaksi/{transaksi}/update-status', [TransaksiController::class, 'updateStatus'])->name('transaksi.updateStatus');
     });
 }

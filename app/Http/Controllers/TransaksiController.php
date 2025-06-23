@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\TransactionStatusUpdated; // 1. Import event baru
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -124,6 +125,9 @@ class TransaksiController extends Controller
         if (isset($allowedTransitions[$currentStatus]) && in_array($newStatus, $allowedTransitions[$currentStatus])) {
             $transaksi->status_transaksi = $newStatus;
             $transaksi->save();
+
+            // Ini akan mengirim pembaruan ke pembeli secara real-time
+            broadcast(new TransactionStatusUpdated($transaksi, $currentStatus))->toOthers();
 
             return back()->with('success', 'Status transaksi berhasil diperbarui menjadi ' . $newStatus . '.');
         } else {

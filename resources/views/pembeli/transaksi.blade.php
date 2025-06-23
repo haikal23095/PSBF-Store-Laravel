@@ -237,7 +237,7 @@
           <span class="nav-label">{{ $info['label'] }}</span>
           
           {{-- PERUBAHAN DI SINI --}}
-          <span class="nav-count">{{ $statusCounts[$key] ?? 0 }}</span>
+          <span id="status-count-{{ $key }}" class="nav-count">{{ $statusCounts[$key] ?? 0 }}</span>
 
         </a>
       @endforeach
@@ -275,7 +275,7 @@
             ];
           @endphp
           
-          <a href="{{ route('pembeli.transaksi.show', $trx->id) }}" class="transaction-card">
+          <a id="transaction-card-{{ $trx->id }}" href="{{ route('pembeli.transaksi.show', $trx->id) }}" class="transaction-card">
             <div class="transaction-header">
               <div class="transaction-icon">
                 <i class="{{ $statusIcons[$trx->status_transaksi] ?? 'fas fa-receipt' }}"></i>
@@ -349,3 +349,53 @@
   </div>
 </div>
 @endsection
+{{-- Tambahkan ini di bagian paling akhir file Anda, setelah @endsection --}}
+@push('scripts')
+{{-- Pastikan file resources/js/bootstrap.js Anda sudah di-import di layout utama --}}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Pastikan Echo sudah terinisialisasi
+        if (typeof window.Echo !== 'undefined') {
+            // Dengarkan pada channel privat milik pengguna yang sedang login
+            window.Echo.private('user.{{ Auth::id() }}')
+                .listen('.transaction.status.updated', (e) => {
+                    console.log('Event status update diterima:', e);
+
+                    const currentStatusOnPage = '{{ $currentStatus }}';
+                    const oldStatusFromEvent = e.old_status;
+                    const newStatusFromEvent = e.new_status;
+
+                    // 1. Update penghitung di navbar
+                    const oldStatusCounter = document.getElementById(`status-count-${oldStatusFromEvent}`);
+                    const newStatusCounter = document.getElementById(`status-count-${newStatusFromEvent}`);
+
+                    if (oldStatusCounter) {
+                        oldStatusCounter.textContent = parseInt(oldStatusCounter.textContent) - 1;
+                    }
+                    if (newStatusCounter) {
+                        newStatusCounter.textContent = parseInt(newStatusCounter.textContent) + 1;
+                    }
+
+                    // 2. Hapus kartu transaksi dari tab saat ini jika statusnya berubah
+                    const transactionCard = document.getElementById(`transaction-card-${e.transaction_id}`);
+                    if (transactionCard && currentStatusOnPage === oldStatusFromEvent) {
+                        // Animasi fade out untuk pengalaman yang lebih baik
+                        transactionCard.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        transactionCard.style.opacity = '0';
+                        transactionCard.style.transform = 'scale(0.95)';
+
+                        setTimeout(() => {
+                            transactionCard.remove();
+                        }, 500); // Hapus elemen setelah animasi selesai
+                    }
+
+                    // 3. Tampilkan notifikasi (opsional, tapi sangat direkomendasikan)
+                    // Anda bisa menggunakan library seperti Toastify.js atau SweetAlert2
+                    alert(`Status Pesanan #${e.transaction_id} telah diperbarui menjadi "${e.new_status_label}"`);
+                });
+        } else {
+            console.warn('Laravel Echo tidak terdeteksi. Update real-time tidak akan berfungsi.');
+        }
+    });
+</script>
+@endpush
