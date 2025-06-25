@@ -93,6 +93,34 @@ class TransaksiController extends Controller
 
     }
 
+    public function updateStatusDiterima(Request $request, Transaction $transaksi)
+    {
+        // 1. Otorisasi: Pastikan pengguna adalah pemilik transaksi
+        if (Auth::id() !== $transaksi->user_id) {
+            return back()->with('error', 'Anda tidak memiliki akses ke transaksi ini.');
+        }
+
+        // 2. Validasi State: Pastikan hanya bisa konfirmasi jika statusnya 'dikirim'
+        if ($transaksi->status_transaksi !== 'dikirim') {
+            return back()->with('error', 'Status transaksi tidak valid untuk konfirmasi.');
+        }
+
+        // Simpan status lama untuk event
+        $oldStatus = $transaksi->status_transaksi;
+
+        // 3. Update Status di Database
+        $transaksi->status_transaksi = 'diterima';
+        $transaksi->save();
+
+        // 4. Broadcast Event ke semua pihak terkait (pembeli & penjual)
+        broadcast(new TransactionStatusUpdated($transaksi, $oldStatus))->toOthers();
+
+        // 5. Redirect kembali dengan pesan sukses
+        // Meskipun frontend akan update via JS, redirect ini berguna jika JS gagal.
+        return redirect()->route('pembeli.transaksi.show', $transaksi)
+                         ->with('success', 'Konfirmasi pesanan berhasil. Transaksi selesai.');
+    }
+
     public function updateStatus(Request $request, Transaction $transaksi)
     {
         // Validate the incoming status

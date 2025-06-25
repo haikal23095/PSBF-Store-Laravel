@@ -19,7 +19,7 @@
                     <p class="text-sm text-gray-600">Tanggal: {{ \Carbon\Carbon::parse($transaksi->tanggal_transaksi)->format('d F Y, H:i') }}</p>
                 </div>
                 <div class="text-right">
-                    <span class="px-4 py-2 rounded-full text-sm font-semibold
+                    <span id="transaction-status-badge" class="px-4 py-2 rounded-full text-sm font-semibold
                         @switch($transaksi->status_transaksi)
                             @case('menunggu_pembayaran') bg-yellow-200 text-yellow-800 @break
                             @case('dikemas') bg-blue-200 text-blue-800 @break
@@ -75,7 +75,7 @@
             </div>
 
             {{-- Aksi Pembeli --}}
-            <div class="mt-8 pt-6 border-t">
+            <div id="buyer-action-container" class="mt-8 pt-6 border-t">
                 @if ($transaksi->status_transaksi == 'dikirim')
                     <h3 class="text-lg font-semibold text-center mb-3">Barang sudah Anda terima?</h3>
                     <p class="text-center text-gray-600 mb-4">Konfirmasi untuk menyelesaikan transaksi.</p>
@@ -87,6 +87,11 @@
                             Konfirmasi Pesanan Diterima
                         </button>
                     </form>
+                @elseif($transaksi->status_transaksi == 'diterima')
+                    <div class="text-center text-green-600">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                        <p class="font-semibold">Transaksi telah selesai pada {{ $transaksi->updated_at->format('d F Y, H:i') }}.</p>
+                    </div>
                 @else
                     <p class="text-center text-gray-600">Tidak ada aksi yang dapat dilakukan saat ini.</p>
                 @endif
@@ -95,3 +100,44 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Pastikan Echo sudah ter-load
+        if (typeof window.Echo !== 'undefined') {
+            // Dengarkan pada channel privat milik pembeli
+            window.Echo.private('user.{{ Auth::id() }}')
+                .listen('.transaction.status.updated', (e) => {
+                    console.log('Event status update diterima:', e);
+
+                    // Cek apakah event ini untuk transaksi yang sedang dilihat
+                    if (e.transaction_id === {{ $transaksi->id }}) {
+                        const statusBadge = document.getElementById('transaction-status-badge');
+                        const actionContainer = document.getElementById('buyer-action-container');
+
+                        if (statusBadge && e.new_status === 'diterima') {
+                            // 1. Update Teks Status
+                            statusBadge.textContent = 'Diterima';
+
+                            // 2. Update Warna Badge Status
+                            statusBadge.className = 'px-4 py-2 rounded-full text-sm font-semibold bg-green-200 text-green-800';
+
+                            // 3. Ganti Tombol Aksi dengan pesan "Transaksi Selesai"
+                            if (actionContainer) {
+                                actionContainer.innerHTML = `
+                                    <div class="text-center text-green-600">
+                                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                        <p class="font-semibold">Transaksi telah selesai.</p>
+                                    </div>
+                                `;
+                            }
+                        }
+                    }
+                });
+        } else {
+            console.warn('Laravel Echo tidak ditemukan. Pembaruan real-time tidak akan berfungsi.');
+        }
+    });
+</script>
+@endpush

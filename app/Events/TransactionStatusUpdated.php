@@ -50,7 +50,31 @@ class TransactionStatusUpdated implements ShouldBroadcast
 
     public function broadcastOn(): array
     {
-        return [new PrivateChannel('user.' . $this->transaction->user_id)];
+        // 1. Ambil semua ID penjual yang unik dari detail transaksi
+        $sellerIds = $this->transaction->details()
+            ->with('product.user') // Eager load untuk efisiensi query
+            ->get()
+            ->pluck('product.user.id') // Ambil semua ID user (penjual) dari relasi produk
+            ->unique() // Pastikan setiap ID penjual hanya ada satu
+            ->filter() // Hapus nilai null jika ada
+            ->all();
+
+        // 2. Siapkan array untuk semua channel yang akan di-broadcast
+        $channels = [];
+
+        // 3. Tambahkan channel privat untuk PEMBELI
+        $channels[] = new PrivateChannel('user.' . $this->transaction->user_id);
+
+        // 4. Tambahkan channel privat untuk setiap PENJUAL yang terlibat
+        foreach ($sellerIds as $sellerId) {
+            // Hindari mengirim notifikasi ganda jika pembeli adalah penjualnya sendiri (kasus langka)
+            if ($sellerId != $this->transaction->user_id) {
+                $channels[] = new PrivateChannel('user.' . $sellerId);
+            }
+        }
+
+        // 5. Kembalikan semua channel yang sudah dikumpulkan
+        return $channels;
     }
     public function broadcastAs(): string
     {

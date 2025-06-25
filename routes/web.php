@@ -58,6 +58,7 @@ if (request()->getPort() == 8000) {
         Route::patch('/transaksi/{transaksi}/update-status-diterima', [TransaksiController::class, 'updateStatusDiterima'])->name('pembeli.transaksi.updateStatusDiterima');
         // Rute untuk pengecekan status
         Route::get('/transaksi/{transaksi}/check-status', [App\Http\Controllers\TransaksiController::class, 'checkStatus'])->name('pembeli.transaksi.checkStatus');
+        Route::patch('/transaksi/{transaksi}/diterima', [TransaksiController::class, 'updateStatusDiterima'])->name('pembeli.transaksi.updateStatusDiterima');
     });
 }
 
