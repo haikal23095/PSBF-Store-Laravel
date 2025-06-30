@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use App\Events\TransactionStatusUpdated; // 1. Import event baru
 use App\Models\Transaction;
 use Illuminate\Http\Request;
