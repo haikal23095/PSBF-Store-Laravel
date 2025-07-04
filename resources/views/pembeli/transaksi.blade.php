@@ -217,7 +217,6 @@
       </div>
     </div>
     
-<nav>
     <div class="navbar-nav-custom">
       @php
         $statuses = [
@@ -243,7 +242,6 @@
       @endforeach
     </div>
 </nav>
-  </nav>
 
   {{-- Main Content --}}
   <div class="main-content">
@@ -354,7 +352,8 @@
 {{-- Pastikan file resources/js/bootstrap.js Anda sudah di-import di layout utama --}}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Pastikan Echo sudah terinisialisasi
+        console.log('Echo object:', window.Echo);
+        
         if (typeof window.Echo !== 'undefined') {
             // Dengarkan pada channel privat milik pengguna yang sedang login
             window.Echo.private('user.{{ Auth::id() }}')

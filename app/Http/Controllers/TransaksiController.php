@@ -184,6 +184,9 @@ class TransaksiController extends Controller
         // Kembalikan view dengan data transaksi yang sudah lengkap
         return view('pembeli.transaksi.show', compact('transaksi'));
     }
+
+
+
     public function checkStatus(Transaction $transaksi)
     {
         // Pastikan hanya pemilik yang bisa cek
@@ -202,12 +205,15 @@ class TransaksiController extends Controller
             // Logika pembaruan status berdasarkan respons
             // Ini bisa direfaktor dari logika yang ada di handleMidtransNotification
             if ($status->transaction_status == 'settlement' || $status->transaction_status == 'capture') {
+                $oldStatus = $transaksi->status_transaksi;
                 $transaksi->status_transaksi = 'dikemas';
                 if ($transaksi->payment) {
                     $transaksi->payment->status_payment = 'paid';
                     $transaksi->payment->save();
                 }
                 $transaksi->save();
+
+                broadcast(new TransactionStatusUpdated($transaksi, $oldStatus))->toOthers();
 
                 return redirect()->route('pembeli.transaksi.show', $transaksi)->with('success', 'Status pembayaran berhasil diperbarui!');
             }

@@ -25,7 +25,7 @@
                       {{ $currentStatus == $key ? 'bg-blue-600 text-white shadow' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
                 {{ $label }}
                 @if (isset($statusCounts[$key]) && $statusCounts[$key] > 0)
-                    <span class="ml-1 text-sm font-semibold {{ $currentStatus == $key ? 'bg-blue-700' : 'bg-gray-300 text-gray-800' }} px-2 py-0.5 rounded-full">
+                    <span id="status-count-{{ $key }}" class="ml-1 text-sm font-semibold {{ $currentStatus == $key ? 'bg-blue-700' : 'bg-gray-300 text-gray-800' }} px-2 py-0.5 rounded-full">
                         {{ $statusCounts[$key] }}
                     </span>
                 @endif
@@ -48,7 +48,7 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 @forelse ($transaksis as $item)
-                    <tr>
+                    <tr id="transaksi-row-{{ $item->id }}">
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                             {{ $item->created_at->format('d M Y H:i') }}
                         </td>
@@ -131,7 +131,49 @@
     </div>
 </div>
 
+@push('scripts')
 <script>
+    console.log('Echo object:', window.Echo);
+
+    if (window.Echo) {
+        console.log('Echo found, attempting to connect...');
+
+        window.Echo.private('user.{{ auth()->id() }}')
+            .listen('.transaction.status.updated', (e) => {
+                console.log('🎉 Event status update diterima!', e);
+
+                const oldStatusCounter = document.getElementById(`status-count-${e.old_status}`);
+                const newStatusCounter = document.getElementById(`status-count-${e.new_status}`);
+
+                if (oldStatusCounter) {
+                    let count = parseInt(oldStatusCounter.textContent);
+                    oldStatusCounter.textContent = count > 0 ? count - 1 : 0;
+                }
+                if (newStatusCounter) {
+                    let count = parseInt(newStatusCounter.textContent);
+                    newStatusCounter.textContent = count + 1;
+                }
+
+                const transactionRow = document.getElementById(`transaksi-row-${e.transaction_id}`);
+                if (transactionRow) {
+                    // Beri efek fade out agar perpindahan lebih mulus
+                    transactionRow.style.transition = 'opacity 0.5s ease-out';
+                    transactionRow.style.opacity = '0';
+
+                    // Hapus elemen dari DOM setelah animasi selesai
+                    setTimeout(() => {
+                        transactionRow.remove();
+                    }, 500);
+                }
+                alert(`Pesanan #${e.transaction_id} statusnya diupdate menjadi "${e.new_status_label}"`);
+            })
+            .error((error) => {
+                console.error('❌ Echo Gagal terhubung ke channel:', error);
+            });
+    } else {
+        console.error('❌ Echo tidak ditemukan! Pastikan aset (app.js) sudah di-build dan di-load.');
+    }
+
     function openDetailsModal(details, orderId) {
         const modal = document.getElementById('detailsModal');
         const modalOrderId = document.getElementById('modalOrderId');
@@ -177,4 +219,5 @@
         }
     }
 </script>
+@endpush
 @endsection

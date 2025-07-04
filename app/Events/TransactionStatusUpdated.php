@@ -24,9 +24,6 @@ class TransactionStatusUpdated implements ShouldBroadcast
      * @param Transaction $transaction
      * @param string $oldStatus // Tambahkan parameter ini
      */
-
-
-    // Create a new event instance.
     public function __construct(Transaction $transaction, string $oldStatus)
     {
         $this->transaction = $transaction;

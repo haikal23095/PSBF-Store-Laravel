@@ -1,5 +1,7 @@
 @extends('layouts.app')
-
+@php
+    use Illuminate\Support\Str;
+@endphp
 @section('content')
 <div class="container mx-auto px-4 py-8">
     {{-- Tombol Kembali --}}
@@ -16,7 +18,7 @@
             <div class="flex justify-between items-center">
                 <div>
                     <h2 class="text-xl font-bold text-gray-800">Detail Transaksi #{{ $transaksi->id }}</h2>
-                    <p class="text-sm text-gray-600">Tanggal: {{ \Carbon\Carbon::parse($transaksi->tanggal_transaksi)->format('d F Y, H:i') }}</p>
+                    <p class="text-sm text-gray-600">Tanggal: {{ $transaksi->created_at->format('d F Y, H:i') }}</p>
                 </div>
                 <div class="text-right">
                     <span id="transaction-status-badge" class="px-4 py-2 rounded-full text-sm font-semibold
@@ -91,7 +93,7 @@
                     <div class="text-center text-green-600">
                         <i class="fas fa-check-circle fa-2x mb-2"></i>
                         <p class="font-semibold">Transaksi telah selesai pada {{ $transaksi->updated_at->format('d F Y, H:i') }}.</p>
-                    </div>
+                    </div>  
                 @else
                     <p class="text-center text-gray-600">Tidak ada aksi yang dapat dilakukan saat ini.</p>
                 @endif
@@ -104,40 +106,124 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Pastikan Echo sudah ter-load
+        console.log('🔍 Transaction detail page loaded');
+        console.log('Echo object:', window.Echo);
+        console.log('Current user ID:', {{ Auth::id() }});
+        console.log('Current transaction ID:', {{ $transaksi->id }});
+
         if (typeof window.Echo !== 'undefined') {
-            // Dengarkan pada channel privat milik pembeli
+            console.log('✅ Echo found, setting up listener...');
+            
             window.Echo.private('user.{{ Auth::id() }}')
                 .listen('.transaction.status.updated', (e) => {
-                    console.log('Event status update diterima:', e);
+                    console.log('🎉 Event status update received:', e);
+                    console.log('📊 Event details:', {
+                        event_transaction_id: e.transaction_id,
+                        current_page_transaction_id: {{ $transaksi->id }},
+                        old_status: e.old_status,
+                        new_status: e.new_status,
+                        match: e.transaction_id === {{ $transaksi->id }}
+                    });
 
                     // Cek apakah event ini untuk transaksi yang sedang dilihat
                     if (e.transaction_id === {{ $transaksi->id }}) {
-                        const statusBadge = document.getElementById('transaction-status-badge');
-                        const actionContainer = document.getElementById('buyer-action-container');
-
-                        if (statusBadge && e.new_status === 'diterima') {
-                            // 1. Update Teks Status
-                            statusBadge.textContent = 'Diterima';
-
-                            // 2. Update Warna Badge Status
-                            statusBadge.className = 'px-4 py-2 rounded-full text-sm font-semibold bg-green-200 text-green-800';
-
-                            // 3. Ganti Tombol Aksi dengan pesan "Transaksi Selesai"
-                            if (actionContainer) {
-                                actionContainer.innerHTML = `
-                                    <div class="text-center text-green-600">
-                                        <i class="fas fa-check-circle fa-2x mb-2"></i>
-                                        <p class="font-semibold">Transaksi telah selesai.</p>
-                                    </div>
-                                `;
-                            }
-                        }
+                        console.log('✅ Event matches current transaction');
+                        
+                        updateTransactionUI(e.new_status, e.new_status_label);
+                        
+                        // Show notification
+                        showNotification(`Status transaksi diperbarui menjadi "${e.new_status_label}"`);
+                    } else {
+                        console.log('ℹ️ Event for different transaction, ignoring');
                     }
+                })
+                .error((error) => {
+                    console.error('❌ Echo listen error:', error);
                 });
+
+            // Debug connection
+            if (window.Echo.connector && window.Echo.connector.pusher) {
+                window.Echo.connector.pusher.connection.bind('connected', () => {
+                    console.log('✅ WebSocket connected on detail page');
+                });
+            }
         } else {
-            console.warn('Laravel Echo tidak ditemukan. Pembaruan real-time tidak akan berfungsi.');
+            console.error('❌ Laravel Echo tidak ditemukan');
         }
     });
+
+    function updateTransactionUI(newStatus, newStatusLabel) {
+        const statusBadge = document.getElementById('transaction-status-badge');
+        const actionContainer = document.getElementById('buyer-action-container');
+
+        if (statusBadge) {
+            // Update text
+            statusBadge.textContent = newStatusLabel || newStatus;
+
+            // Update classes based on status
+            const statusClasses = {
+                'menunggu_pembayaran': 'px-4 py-2 rounded-full text-sm font-semibold bg-yellow-200 text-yellow-800',
+                'dikemas': 'px-4 py-2 rounded-full text-sm font-semibold bg-blue-200 text-blue-800',
+                'dikirim': 'px-4 py-2 rounded-full text-sm font-semibold bg-indigo-200 text-indigo-800',
+                'diterima': 'px-4 py-2 rounded-full text-sm font-semibold bg-green-200 text-green-800'
+            };
+
+            statusBadge.className = statusClasses[newStatus] || 'px-4 py-2 rounded-full text-sm font-semibold bg-gray-200 text-gray-800';
+        }
+
+        // Update action container based on new status
+        if (actionContainer) {
+            if (newStatus === 'dikirim') {
+                actionContainer.innerHTML = `
+                    <h3 class="text-lg font-semibold text-center mb-3">Barang sudah Anda terima?</h3>
+                    <p class="text-center text-gray-600 mb-4">Konfirmasi untuk menyelesaikan transaksi.</p>
+                    <form action="{{ route('pembeli.transaksi.updateStatusDiterima', $transaksi) }}" method="POST" class="text-center">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="w-full md:w-auto px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            Konfirmasi Pesanan Diterima
+                        </button>
+                    </form>
+                `;
+            } else if (newStatus === 'diterima') {
+                actionContainer.innerHTML = `
+                    <div class="text-center text-green-600">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                        <p class="font-semibold">Transaksi telah selesai.</p>
+                    </div>
+                `;
+            } else {
+                actionContainer.innerHTML = `
+                    <p class="text-center text-gray-600">Tidak ada aksi yang dapat dilakukan saat ini.</p>
+                `;
+            }
+        }
+    }
+
+    function showNotification(message) {
+        // Create toast notification
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 14px;
+            max-width: 400px;
+        `;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            toast.remove();
+        }, 5000);
+    }
 </script>
 @endpush
